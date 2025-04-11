@@ -1,0 +1,10 @@
+# First ignore everything
+*
+
+# Then un-ignore only what you want
+!*.c
+!*.cpp
+!.gitignore
+# Add other important files you want to keep
+!README.md
+!Makefile
