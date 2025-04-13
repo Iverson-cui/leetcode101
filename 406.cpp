@@ -59,3 +59,22 @@ vector<vector<int>> reconstructQueue(vector<vector<int>> &people)
     }
     return result;
 }
+
+vector<vector<int>> reconstructQueue(vector<vector<int>> &people)
+{
+    vector<vector<int>> result;
+    sort(people.begin(), people.end(), [](const vector<int> &a, const vector<int> &b)
+         {
+             return a[0] > b[0] || (a[0] == b[0] && a[1] < b[1]); // Larger heights come first
+         });
+    for (const auto &person : people)
+    {
+        result.insert(result.begin() + person[1], person);
+    }
+    return result;
+}
+
+/*
+two greedy solutions. One based on the second element of person, the other based on the first element of person.
+The first solution is more complicated, the second one is more elegant.
+*/
