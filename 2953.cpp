@@ -110,6 +110,8 @@ int main(void)
 
 /**
  * 上面的解法过于麻烦，引入accumulate是为了处理相邻char相差大于2的情况，更方便的做法是直接根据相差大于2的字符来将字符串分段处理。
+ * 注意这里面string_view数据结构的使用，其实他类似于string temp=string.substr(start, length)，但是不会进行数据拷贝，节省时间和空间，本质上是个指针。
+ * 相比用一个unordered_map来记录char出现的频率，因为char本身只有26个，所以直接用array更好。检验一个窗口是否合法，就看array的各个数。一个字符要么出现0次，要么出现k次，其余情况全是不合法的。
  */
 
 class Solution
@@ -117,13 +119,16 @@ class Solution
     int f(string_view s, int k)
     {
         int res = 0;
+        // try all possible number of unique characters
         for (int m = 1; m <= 26 && k * m <= s.length(); m++)
         {
             int cnt[26]{};
+            // lambda function to check validity
             auto check = [&]()
             {
                 for (int i = 0; i < 26; i++)
                 {
+                    // a character appears but not exactly k times->invalid
                     if (cnt[i] && cnt[i] != k)
                     {
                         return;
@@ -131,6 +136,7 @@ class Solution
                 }
                 res++;
             };
+            // sliding window
             for (int right = 0; right < s.length(); right++)
             {
                 cnt[s[right] - 'a']++;
