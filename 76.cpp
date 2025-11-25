@@ -136,3 +136,115 @@ string minWindow(string s, string t)
 用一个count来记录满足的t的个数。否则就需要一个循环，对于所有valid的字符逐层进行判断。
 2个指针的配合：先固定l不动，让r一直右移动，找到满足的r，这个时候右移动l，直到不满足条件。这个时候就可以更新min_l和min_length了。然后继续右移动r，直到r到达s的末尾。
 */
+
+class Solution
+{
+public:
+    vector<int> keepFreq(string t)
+    {
+        vector<int> freq(128, 0);
+        for (char c : t)
+        {
+            freq[c]++;
+        }
+        return freq;
+    }
+    bool isValid(const vector<int> &freq_t, const vector<int> &currentFreq)
+    {
+        for (int i = 0; i < 128; ++i)
+        {
+            if (currentFreq[i] < freq_t[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    string minWindow(string s, string t)
+    {
+        vector<int> freq_t = keepFreq(t);
+        vector<int> currentFreq(128, 0);
+        long len = s.length();
+        int left = 0, right = 0;
+        int minLen = INT16_MAX;
+        string result = "";
+        for (; right < len; ++right)
+        {
+            currentFreq[s[right]]++;
+            while (isValid(freq_t, currentFreq))
+            {
+                if (minLen > right - left + 1)
+                {
+                    minLen = right - left + 1;
+                    result = s.substr(left, minLen);
+                }
+                ++left;
+                currentFreq[s[left - 1]]--;
+            }
+        }
+        return result;
+    }
+};
+
+/**
+ * 经过优化，可以大幅度减少每次判断的复杂度。用一个less变量来记录不符合条件的字符个数，只要less=0就说明都符合了。进一步的优化包括用一个数组，其中元素可以取正负，来记录窗口和原文的某个字符的差值。
+ */
+
+class Solution
+{
+public:
+    vector<int> keepFreq(string t)
+    {
+        vector<int> freq(128, 0);
+        for (char c : t)
+        {
+            freq[c]++;
+        }
+        return freq;
+    }
+    bool isValid(const vector<int> &freq_t, const vector<int> &currentFreq, int &lessCount)
+    {
+        for (int i = 0; i < 128; ++i)
+        {
+            if (currentFreq[i] < freq_t[i])
+            {
+                ++lessCount;
+            }
+        }
+        return lessCount == 0;
+    }
+    string minWindow(string s, string t)
+    {
+        vector<int> freq_t = keepFreq(t);
+        vector<int> currentFreq(128, 0);
+        long len = s.length();
+        int left = 0, right = 0;
+        int minLen = INT16_MAX;
+        int lessCount = 0;
+        string result = "";
+        isValid(freq_t, currentFreq, lessCount);
+        for (; right < len; ++right)
+        {
+            currentFreq[s[right]]++;
+            if (currentFreq[s[right]] == freq_t[s[right]])
+            {
+                --lessCount;
+            }
+            while (lessCount == 0)
+            {
+                if (minLen > right - left + 1)
+                {
+                    minLen = right - left + 1;
+                    result = s.substr(left, minLen);
+                }
+                ++left;
+                currentFreq[s[left - 1]]--;
+                if (currentFreq[s[left - 1]] < freq_t[s[left - 1]])
+                {
+                    ++lessCount;
+                }
+            }
+        }
+        return result;
+    }
+};
